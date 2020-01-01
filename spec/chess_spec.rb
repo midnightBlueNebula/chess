@@ -3,11 +3,17 @@ RSpec.describe Chess do
     chess = Chess.new
 
     describe "#move_piece" do
-        it "should move selected piece without violating any rules." do
+        it "should move selected piece without duplicate it." do
             chess.board[1][1] = ["player_1","pawn"]
+            chess.board[1][2] = ""
             chess.board[0][2] = ["player_1","knight"]
-            expect(chess.move_piece([1,1],[1,2])).not_to eql("invalid move")
-            expect(chess.move_piece([0,2],[1,4])).not_to eql("invalid move")
+            chess.board[1][4] = ""
+            chess.move_piece([1,1],[1,2])
+            chess.move_piece([0,2],[1,4])
+            expect(chess.board[1][1]).to eql("")
+            expect(chess.board[1][2]).to eql(["player_1","pawn"])
+            expect(chess.board[0][2]).to eql("")
+            expect(chess.board[1][4]).to eql(["player_1","knight"])
         end
 
         it "should take out opponent's chess piece if moved to its position." do
@@ -26,19 +32,20 @@ RSpec.describe Chess do
         end
 
         it "shouldn't move over chess piece unless moved piece is knight." do
-            chess.board[0][5] = ["player_1","pawn"]
+            chess.board[5][0] = ["player_1","pawn"]
             chess.board[0][0] = ["player_1","root"]
-            if chess.player_turn == "player_2" || chess.player_turn == "player_1"
-                expect(chess.move_piece([0,0],[0,6])).to eql("invalid move")
-            end
+            chess.board[1][1] = ["player_1","pawn"]
+            chess.board[0][1] = ["player_1","knight"]
+            chess.player_turn = "player_1"
+            expect(chess.move_piece([0,0],[6,0])).to eql("invalid move")
+            expect(chess.move_piece([0,1],[2,2]).to_not eql("invalid move")
         end
 
         it "should not move opponent's chess piece." do
             chess.board[4][0] = ["player_1","root"]
             chess.board[4][1] = ""
-            if chess.player_turn == "player_2"
-                expect(chess.move_piece([4,0],[4,1])).to eql("invalid move")
-            end
+            chess.player_turn == "player_2"
+            expect(chess.move_piece([4,0],[4,1])).to eql("invalid move")
         end
     end
 
@@ -85,10 +92,9 @@ RSpec.describe Chess do
         it "should return true if one of player took out the opponent's king." do
             chess.board[7][4] = ["player_2","king"]
             chess.board[5][3] = ["player_1","knight"]
-            if chess.player_turn == "player_1"
-                chess.move_piece([5,3],[7,4])
-                expect(chess.won?).to eql(true)
-            end
+            chess.player_turn == "player_1"
+            chess.move_piece([5,3],[7,4])
+            expect(chess.won?).to eql(true)
         end
     end
 end
