@@ -5,13 +5,13 @@ RSpec.describe Chess do
     describe "#move_piece" do
         it "should move selected piece without duplicate it." do
             chess.board[1][1] = ["player_1","pawn"]
-            chess.board[1][2] = ""
+            chess.board[2][1] = ""
             chess.board[0][2] = ["player_1","knight"]
             chess.board[1][4] = ""
-            chess.move_piece([1,1],[1,2])
+            chess.move_piece([1,1],[2,1])
             chess.move_piece([0,2],[1,4])
             expect(chess.board[1][1]).to eql("")
-            expect(chess.board[1][2]).to eql(["player_1","pawn"])
+            expect(chess.board[2][1]).to eql(["player_1","pawn"])
             expect(chess.board[0][2]).to eql("")
             expect(chess.board[1][4]).to eql(["player_1","knight"])
         end
@@ -21,10 +21,12 @@ RSpec.describe Chess do
             if chess.player_turn == "player_2"
                 chess.move_piece([7,0],[1,0])
                 expect(chess.board[1][0]).to eql(["player_2","root"])
+                expect(chess.last_casualty).to eql("pawn")
             end
         end
 
         it "should not move if player's chess piece already in destination position." do
+            chess.board[0][2] = ["player_1","knight"]
             chess.board[1][4] = ["player_1","pawn"]
             if chess.player_turn == "player_1"
                 expect(chess.move_piece([0,2],[1,4])).to eql("invalid move")
