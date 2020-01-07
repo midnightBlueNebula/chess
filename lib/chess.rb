@@ -24,9 +24,25 @@ class Chess
                 p "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
                 target = select_piece_menu("target")
-            else
+                while move_piece(selected,target) == "invalid move"
+                    p "Invalid move. Please try again."
+                    selected = select_piece_menu("select")
+                    target = select_piece_menu("target")
+                end
+                @game_status = false if won? == true
+                @player_turn = "player_2"
+            elsif
+                p "Please enter the cordinations of the chess piece you would like to select."
+                selected = select_piece_menu("select")
+                target = select_piece_menu("target")
+                while move_piece(selected,target) == "invalid move"
+                    p "Invalid move. Please try again."
+                    selected = select_piece_menu("select")
+                    target = select_piece_menu("target")
+                end
+                @game_status = false if won? == true
+                @player_turn = "player_1"
             end
-            @game_status = false if won? == true
         end
     end
 
@@ -69,6 +85,7 @@ class Chess
         @last_casualty = @board[des[0]][des[1]][0] if @board[des[0]][des[1]][0] != nil
         @board[sel[0]][sel[1]] = ""
         @board[des[0]][des[1]] = selected_piece
+        return @board[des[0]][des[1]]
     end
 
     def reset
