@@ -3,7 +3,7 @@ class Chess
     attr_accessor :board, :game_status, :input, :last_casualty, :player_turn 
 
     def initialize
-        @board = Array.new(8) { |r| Array.new(8) { |c| "#{r},#{c}" } }
+        @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
         #@board[0] ***************************************
         @board[1].collect! { |c| c = ["player_1","pawn"] }
         @board[6].collect! { |c| c = ["player_2","pawn"] }
@@ -14,18 +14,65 @@ class Chess
         @input = nil 
     end
 
+    def print_board
+    end
+
     def play 
         while @game_status
+            @last_casualty = nil
+            if @player_turn == "player_1"
+                p "Please enter the cordinations of the chess piece you would like to select."
+                selected = select_piece_menu("select")
+                target = select_piece_menu("target")
+            else
+            end
+            @game_status = false if won? == true
         end
+    end
+
+    def select_piece_menu(opt)
+        row = nil
+        col = nil
+        while row == nil || row < 0 || row > 7
+            p "Row:"
+            row = Integer(gets.chomp)
+            p "Invalid input. Please try again." if row == nil || row < 0 || row > 7
+        end
+        while col == nil || col < 0 || col > 7
+            p "Column:"
+            col = Integer(gets.chomp)
+            p "Invalid input. Please try again." if col == nil || col < 0 || col > 7
+        end
+        if opt == "select"
+            if @board[row][col] == ""
+                p "You've selected empty square. Please select one of your chess piece."
+                select_piece_menu("select") 
+            elsif @board[row][col][0] != @player_turn
+                p "#{@board[row][col]} is your opponent's chess piece. Please select one of your chess piece."
+                select_piece_menu("select") 
+            end
+            p "You've selected #{@board[row][col]}"
+        elsif opt == "target"
+            if @board[row][col][0] == @player_turn
+                p "Target destination already occupied by one of your chess piece. Please try Again."
+                select_piece_menu("target")
+            end
+        end
+        return [row,col]
     end
 
     def move_piece(sel,des)
         selected_piece = @board[sel[0]][sel[1]]
+        moves = available_moves(selected_piece,sel)
+        return "invalid move" if moves.include?(des) == false
         destination = @board[des[0]][des[1]]
+        @last_casualty = @board[des[0]][des[1]][0] if @board[des[0]][des[1]][0] != nil
+        @board[sel[0]][sel[1]] = ""
+        @board[des[0]][des[1]] = selected_piece
     end
 
     def reset
-        @board = Array.new(8) { |r| Array.new(8) { |c| "#{r},#{c}" } }
+        @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
         #@board[0] ***************************************
         @board[1].collect! { |c| c = ["player_1","pawn"] }
         @board[6].collect! { |c| c = ["player_2","pawn"] }
