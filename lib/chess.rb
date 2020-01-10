@@ -4,24 +4,24 @@ class Chess
 
     def initialize
         @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
-        @board[0][0] = ["player_1","root"]
+        @board[0][0] = ["player_1","rook"]
         @board[0][1] = ["player_1","knight"]
         @board[0][2] = ["player_1","bishop"]
         @board[0][3] = ["player_1","queen"]
         @board[0][4] = ["player_1","king"]
         @board[0][5] = ["player_1","bishop"]
         @board[0][6] = ["player_1","knight"]
-        @board[0][7] = ["player_1","root"]
+        @board[0][7] = ["player_1","rook"]
         @board[1].collect! { |c| c = ["player_1","pawn"] }
         @board[6].collect! { |c| c = ["player_2","pawn"] }
-        @board[7][0] = ["player_2","root"]
+        @board[7][0] = ["player_2","rook"]
         @board[7][1] = ["player_2","knight"]
         @board[7][2] = ["player_2","bishop"]
         @board[7][3] = ["player_2","queen"]
         @board[7][4] = ["player_2","king"]
         @board[7][5] = ["player_2","bishop"]
         @board[7][6] = ["player_2","knight"]
-        @board[7][7] = ["player_2","root"]
+        @board[7][7] = ["player_2","rook"]
         @player_turn = rand(2) == 1 ? "player_2" : "player_1"
         @game_status = true
         @last_casualty = nil
@@ -29,28 +29,69 @@ class Chess
     end
 
     def print_board
+        @board.each do |r|
+            puts "--------------------------------"
+            print "|"
+            r.each do |c|
+                if c == ""
+                    print "   "
+                elsif c[0] == "player_1"
+                    if c[1] == "pawn"
+                        print " ♙ "
+                    elsif c[1] == "bishop"
+                        print " ♗ "
+                    elsif c[1] == "knight"
+                        print " ♘ "
+                    elsif c[1] == "rook"
+                        print " ♖ "
+                    elsif c[1] == "queen"
+                        print " ♕ "
+                    elsif c[1] == "king"
+                        print " ♔ "
+                    end
+                elsif c [0] == "player_2"
+                    if c[1] == "pawn"
+                        print " ♟ "
+                    elsif c[1] == "bishop"
+                        print " ♝ "
+                    elsif c[1] == "knight"
+                        print " ♞ "
+                    elsif c[1] == "rook"
+                        print " ♜ "
+                    elsif c[1] == "queen"
+                        print " ♛ "
+                    elsif c[1] == "king"
+                        print " ♚ "
+                    end
+                end
+                print "|"
+            end
+            puts ""
+        end
+        puts "--------------------------------"
     end
 
     def play 
         while @game_status
             @last_casualty = nil
+            print_board
             if @player_turn == "player_1"
-                p "Please enter the cordinations of the chess piece you would like to select."
+                puts "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
                 target = select_piece_menu("target")
                 while move_piece(selected,target) == "invalid move"
-                    p "Invalid move. Please try again."
+                    puts "Invalid move. Please try again."
                     selected = select_piece_menu("select")
                     target = select_piece_menu("target")
                 end
                 @game_status = false if won? == true
                 @player_turn = "player_2"
             elsif
-                p "Please enter the cordinations of the chess piece you would like to select."
+                puts "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
                 target = select_piece_menu("target")
                 while move_piece(selected,target) == "invalid move"
-                    p "Invalid move. Please try again."
+                    puts "Invalid move. Please try again."
                     selected = select_piece_menu("select")
                     target = select_piece_menu("target")
                 end
@@ -60,31 +101,40 @@ class Chess
         end
     end
 
+    def save_game
+    end
+
+    def load_game
+    end
+
+    def reset_and_save
+    end
+
     def select_piece_menu(opt)
         row = nil
         col = nil
         while row == nil || row < 0 || row > 7
-            p "Row:"
+            puts "Row:"
             row = Integer(gets.chomp)
-            p "Invalid input. Please try again." if row == nil || row < 0 || row > 7
+            puts "Invalid input. Please try again." if row == nil || row < 0 || row > 7
         end
         while col == nil || col < 0 || col > 7
-            p "Column:"
+            puts "Column:"
             col = Integer(gets.chomp)
-            p "Invalid input. Please try again." if col == nil || col < 0 || col > 7
+            puts "Invalid input. Please try again." if col == nil || col < 0 || col > 7
         end
         if opt == "select"
             if @board[row][col] == ""
-                p "You've selected empty square. Please select one of your chess piece."
+                puts "You've selected empty square. Please select one of your chess piece."
                 select_piece_menu("select") 
             elsif @board[row][col][0] != @player_turn
-                p "#{@board[row][col]} is your opponent's chess piece. Please select one of your chess piece."
+                puts "#{@board[row][col]} is your opponent's chess piece. Please select one of your chess piece."
                 select_piece_menu("select") 
             end
-            p "You've selected #{@board[row][col]}"
+            puts "You've selected #{@board[row][col]}"
         elsif opt == "target"
             if @board[row][col][0] == @player_turn
-                p "Target destination already occupied by one of your chess piece. Please try Again."
+                puts "Target destination already occupied by one of your chess piece. Please try Again."
                 select_piece_menu("target")
             end
         end
@@ -106,24 +156,24 @@ class Chess
 
     def reset
         @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
-        @board[0][0] = ["player_1","root"]
+        @board[0][0] = ["player_1","rook"]
         @board[0][1] = ["player_1","knight"]
         @board[0][2] = ["player_1","bishop"]
         @board[0][3] = ["player_1","queen"]
         @board[0][4] = ["player_1","king"]
         @board[0][5] = ["player_1","bishop"]
         @board[0][6] = ["player_1","knight"]
-        @board[0][7] = ["player_1","root"]
+        @board[0][7] = ["player_1","rook"]
         @board[1].collect! { |c| c = ["player_1","pawn"] }
         @board[6].collect! { |c| c = ["player_2","pawn"] }
-        @board[7][0] = ["player_2","root"]
+        @board[7][0] = ["player_2","rook"]
         @board[7][1] = ["player_2","knight"]
         @board[7][2] = ["player_2","bishop"]
         @board[7][3] = ["player_2","queen"]
         @board[7][4] = ["player_2","king"]
         @board[7][5] = ["player_2","bishop"]
         @board[7][6] = ["player_2","knight"]
-        @board[7][7] = ["player_2","root"]
+        @board[7][7] = ["player_2","rook"]
         @player_turn = rand(2) == 1 ? "player_2" : "player_1"
         @game_status = true
         @last_casualty = nil
@@ -249,7 +299,7 @@ class Chess
             store_moves << [x-1,y+2] if x-1 >= 0 && y+2 < 8 && @board[x-1][y+2][0] != "player_2"
             store_moves << [x+1,y-2] if x+1 < 8 && y-2 >= 0 && @board[x+1][y-2][0] != "player_2"
             store_moves << [x-1,y-2] if x-1 >= 0 && y-2 >= 0 && @board[x-1][y-2][0] != "player_2"
-        elsif piece == "root" && @player_turn == "player_1"
+        elsif piece == "rook" && @player_turn == "player_1"
             nx = x+1
             while @board[nx][y] == "" && nx < 8
                 store_moves << [nx,y]
@@ -278,7 +328,7 @@ class Chess
                 ny -= 1
             end
             store_moves << [x,ny] if @board[x][ny][0] == "player_2" && ny >= 0
-        elsif piece == "root" && @player_turn == "player_2"
+        elsif piece == "rook" && @player_turn == "player_2"
             nx = x+1
             while @board[nx][y] == "" && nx < 8
                 store_moves << [nx,y]
@@ -466,3 +516,6 @@ class Chess
         return store_moves
     end
 end
+
+chess = Chess.new 
+chess.print_board
