@@ -73,9 +73,10 @@ class Chess
                 file_num = 0
                 while file_num < 1 || file_num > list_num
                     puts "Input number next to file name for load game."
-                    file_num = gets.chomp.to_i
+                    file_num = gets.chomp
+                    file_num = file_num.match(/\D/) ? -1 : file_num.to_i
                 end
-                file_to_load = Dir.childeren("savegames")[file_num-1]
+                file_to_load = Dir.childeren("savegames")[file_num-1] #**************test this**************
                 puts "Loading #{file_num}. #{file_to_load}..."
                 @game_status = true
                 @last_casualty = nil
@@ -320,7 +321,7 @@ class Chess
                     @input = -1
                 end
             end
-            row = @input.to_i
+            row = @input.match(/\D/) ? -1 : @input.to_i
             puts "Invalid input. Please try again." if row == nil || row < 0 || row > 7
         end
         while col == nil || col < 0 || col > 7
@@ -339,7 +340,7 @@ class Chess
                     @input = -1
                 end
             end
-            col = @input.to_i
+            col = @input.match(/\D/) ? -1 : @input.to_i
             puts "Invalid input. Please try again." if col == nil || col < 0 || col > 7
         end
         if opt == "select"
@@ -439,13 +440,15 @@ class Chess
     def promote_pawn(row,col)
         puts "Congratulations! Your pawn deserved a promotion!"
         choice = 0
-        while choice < 1 && choice > 4
+        while choice < 1 || choice > 4
             puts "Promote your pawn by entering number next to positions listed below:"
             puts "1. Queen"
             puts "2. Knight"
             puts "3. Rook"
             puts "4. Bishop"
-            choice = gets.chomp.to_i
+            choice = gets.chomp
+            choice = choice.match(/\D/) ? -1 : choice.to_i
+            puts "Invalid input. Please try again." if choice < 1 || choice > 4
         end
         if choice == 1
             @board[row][col] = [@player_turn,"queen"]
