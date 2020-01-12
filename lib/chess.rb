@@ -2,6 +2,7 @@ class Chess
 
     attr_accessor :board, :game_status, :input, :last_casualty, :player_turn 
 
+    #pawn promotion*************************************
     def initialize
         if Dir.empty?("savegames")
             puts "Couldn't found any saved game. Starting new game..."
@@ -70,7 +71,7 @@ class Chess
                     puts "#{list_num}. #{file}"
                 end 
                 file_num = 0
-                while file_num < 1 && file_num > list_num
+                while file_num < 1 || file_num > list_num
                     puts "Input number next to file name for load game."
                     file_num = gets.chomp.to_i
                 end
@@ -165,18 +166,67 @@ class Chess
             if @player_turn == "player_1"
                 puts "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
+                if @input == castling
+                    @player_turn = "player_2"
+                    next
+                end
                 target = select_piece_menu("target")
+                if @input == castling
+                    @player_turn = "player_2"
+                    next
+                end
                 while move_piece(selected,target) == "invalid move"
                     puts "Invalid move. Please try again."
                     selected = select_piece_menu("select")
+                    if @input == "exit"
+                        @game_status = false
+                        puts "Exiting game..."
+                        return
+                    elsif @input == "save"
+                        puts "Saving and exiting game..."
+                        save_game
+                        @game_status = false
+                        return
+                    elsif @input == "reset"
+                        reset
+                    elsif @input == "save and reset"
+                        puts "Saving and starting new game..."
+                        save_and_reset
+                    end
                     target = select_piece_menu("target")
+                    if @input == "exit"
+                        @game_status = false
+                        puts "Exiting game..."
+                        return
+                    elsif @input == "save"
+                        puts "Saving and exiting game..."
+                        save_game
+                        @game_status = false
+                        return
+                    elsif @input == "reset"
+                        reset
+                    elsif @input == "save and reset"
+                        puts "Saving and starting new game..."
+                        save_and_reset
+                    end
+                end
+                if @board[7].any? { |p| p == ["player_1","pawn"] }
+                    promote_pawn(7,@board[7].index(["player_1","pawn"]))
                 end
                 @game_status = false if won? == true
                 @player_turn = "player_2"
-            elsif
+            elsif @player_turn == "player_2"
                 puts "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
+                if @input == castling
+                    @player_turn = "player_1"
+                    next
+                end
                 target = select_piece_menu("target")
+                if @input == castling
+                    @player_turn = "player_1"
+                    next
+                end
                 while move_piece(selected,target) == "invalid move"
                     puts "Invalid move. Please try again."
                     selected = select_piece_menu("select")
@@ -184,13 +234,36 @@ class Chess
                         @game_status = false
                         puts "Exiting game..."
                         return
+                    elsif @input == "save"
+                        puts "Saving and exiting game..."
+                        save_game
+                        @game_status = false
+                        return
+                    elsif @input == "reset"
+                        reset
+                    elsif @input == "save and reset"
+                        puts "Saving and starting new game..."
+                        save_and_reset
                     end
                     target = select_piece_menu("target")
                     if @input == "exit"
                         @game_status = false
                         puts "Exiting game..."
                         return
+                    elsif @input == "save"
+                        puts "Saving and exiting game..."
+                        save_game
+                        @game_status = false
+                        return
+                    elsif @input == "reset"
+                        reset
+                    elsif @input == "save and reset"
+                        puts "Saving and starting new game..."
+                        save_and_reset
                     end
+                end
+                if @board[0].any? { |p| p == ["player_2","pawn"] }
+                    promote_pawn(0,@board[0].index(["player_2","pawn"]))
                 end
                 @game_status = false if won? == true
                 @player_turn = "player_1"
@@ -223,7 +296,9 @@ class Chess
         end 
     end
 
-    def reset_and_save
+    def save_and_reset
+        save_game
+        reset
     end
 
     def select_piece_menu(opt)
@@ -232,14 +307,38 @@ class Chess
         while row == nil || row < 0 || row > 7
             puts "Row:"
             @input = gets.chomp
-            return if @input == "exit"
+            return if @input == "exit" || @input == "save" || @input == "reset" || @input == "save and reset"
+            if @input == "castling"
+                if @player_turn == "player_1" && @castling_available_for_player_1
+                    castling
+                    return
+                elsif @player_turn == "player_2" && @castling_available_for_player_2
+                    castling
+                    return
+                else
+                    puts "You can't make castling move. Try another move:"
+                    @input = -1
+                end
+            end
             row = @input.to_i
             puts "Invalid input. Please try again." if row == nil || row < 0 || row > 7
         end
         while col == nil || col < 0 || col > 7
             puts "Column:"
             @input = gets.chomp
-            return if @input == "exit"
+            return if @input == "exit" || @input == "save" || @input == "reset" || @input == "save and reset"
+            if @input == "castling"
+                if @player_turn == "player_1" && @castling_available_for_player_1
+                    castling
+                    return
+                elsif @player_turn == "player_2" && @castling_available_for_player_2
+                    castling
+                    return
+                else
+                    puts "You can't make castling move. Try another move:"
+                    @input = -1
+                end
+            end
             col = @input.to_i
             puts "Invalid input. Please try again." if col == nil || col < 0 || col > 7
         end
@@ -275,6 +374,7 @@ class Chess
     end
 
     def reset
+        puts "Starting new game..."
         @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
         @board[0][0] = ["player_1","rook"]
         @board[0][1] = ["player_1","knight"]
@@ -298,6 +398,8 @@ class Chess
         @game_status = true
         @last_casualty = nil
         @input = nil 
+        @castling_available_for_player_1 = true
+        @castling_available_for_player_2 = true
     end
 
     def won?
@@ -306,6 +408,54 @@ class Chess
             return true
         end
         return false
+    end
+
+    def castling
+        if @player_turn == "player_1" && @castling_available_for_player_1
+            if @board[0][5] == "" && @board[0][6] == ""
+                @board[0][4] = ""
+                @board[0][7] = ""
+                @board[0][6] = ["player_1","king"]
+                @board[0][5] = ["player_1","rook"]
+                @castling_available_for_player_1 = false
+            else
+                return "invalid move"
+            end
+        elsif @player_turn == "player_2" && @castling_available_for_player_2
+            if @board[7][5] == "" && @board[7][6] == ""
+                @board[7][4] = ""
+                @board[7][7] = ""
+                @board[7][6] = ["player_2","king"]
+                @board[7][5] = ["player_2","rook"]
+                @castling_available_for_player_2 = false
+            else
+                return "invalid move"
+            end
+        else
+            return "invalid move"
+        end
+    end
+
+    def promote_pawn(row,col)
+        puts "Congratulations! Your pawn deserved a promotion!"
+        choice = 0
+        while choice < 1 && choice > 4
+            puts "Promote your pawn by entering number next to positions listed below:"
+            puts "1. Queen"
+            puts "2. Knight"
+            puts "3. Rook"
+            puts "4. Bishop"
+            choice = gets.chomp.to_i
+        end
+        if choice == 1
+            @board[row][col] = [@player_turn,"queen"]
+        elsif choice == 2
+            @board[row][col] = [@player_turn,"knight"]
+        elsif choice == 3
+            @board[row][col] = [@player_turn,"rook"]
+        elsif choice == 4
+            @board[row][col] = [@player_turn,"bishop"]
+        end
     end
 
     def available_moves(piece,pos)
@@ -420,6 +570,7 @@ class Chess
             store_moves << [x+1,y-2] if x+1 < 8 && y-2 >= 0 && @board[x+1][y-2][0] != "player_2"
             store_moves << [x-1,y-2] if x-1 >= 0 && y-2 >= 0 && @board[x-1][y-2][0] != "player_2"
         elsif piece == "rook" && @player_turn == "player_1"
+            @castling_available_for_player_1 = false
             nx = x+1
             while @board[nx][y] == "" && nx < 8
                 store_moves << [nx,y]
@@ -449,6 +600,7 @@ class Chess
             end
             store_moves << [x,ny] if @board[x][ny][0] == "player_2" && ny >= 0
         elsif piece == "rook" && @player_turn == "player_2"
+            @castling_available_for_player_2 = false
             nx = x+1
             while @board[nx][y] == "" && nx < 8
                 store_moves << [nx,y]
@@ -612,6 +764,7 @@ class Chess
             end
             store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && nx >= 0 && ny >= 0
         elsif piece == "king" && @player_turn == "player_1"
+            @castling_available_for_player_1 = false
             store_moves << [x+1,y] if x+1 < 8 && @board[x+1][y] == "" && @board[x+1][y][0] == "player_2"
             store_moves << [x+1,y+1] if x+1 < 8 && y+1 < 8 && @board[x+1][y+1] == "" && @board[x+1][y+1][0] == "player_2"
             store_moves << [x+1,y-1] if x+1 < 8 && y-1 >= 0 && @board[x+1][y-1] == "" && @board[x+1][y-1][0] == "player_2"
@@ -621,6 +774,7 @@ class Chess
             store_moves << [x-1,y+1] if x-1 >= 0 && y+1 < 8 && @board[x-1][y+1] == "" && @board[x-1][y+1][0] == "player_2"
             store_moves << [x-1,y-1] if x-1 >= 0 && y-1 >= 0 && @board[x-1][y-1] == "" && @board[x-1][y-1][0] == "player_2"
         elsif piece == "king" && @player_turn == "player_2"
+            @castling_available_for_player_2 = false
             store_moves << [x+1,y] if x+1 < 8 && @board[x+1][y] == "" && @board[x+1][y][0] == "player_1"
             store_moves << [x+1,y+1] if x+1 < 8 && y+1 < 8 && @board[x+1][y+1] == "" && @board[x+1][y+1][0] == "player_1"
             store_moves << [x+1,y-1] if x+1 < 8 && y-1 >= 0 && @board[x+1][y-1] == "" && @board[x+1][y-1][0] == "player_1"
