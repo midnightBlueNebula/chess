@@ -5,32 +5,8 @@ class Chess
     #pawn promotion*************************************
     def initialize
         if Dir.empty?("savegames")
-            puts "Couldn't found any saved game. Starting new game..."
-            @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
-            @board[0][0] = ["player_1","rook"]
-            @board[0][1] = ["player_1","knight"]
-            @board[0][2] = ["player_1","bishop"]
-            @board[0][3] = ["player_1","queen"]
-            @board[0][4] = ["player_1","king"]
-            @board[0][5] = ["player_1","bishop"]
-            @board[0][6] = ["player_1","knight"]
-            @board[0][7] = ["player_1","rook"]
-            @board[1].collect! { |c| c = ["player_1","pawn"] }
-            @board[6].collect! { |c| c = ["player_2","pawn"] }
-            @board[7][0] = ["player_2","rook"]
-            @board[7][1] = ["player_2","knight"]
-            @board[7][2] = ["player_2","bishop"]
-            @board[7][3] = ["player_2","queen"]
-            @board[7][4] = ["player_2","king"]
-            @board[7][5] = ["player_2","bishop"]
-            @board[7][6] = ["player_2","knight"]
-            @board[7][7] = ["player_2","rook"]
-            @player_turn = rand(2) == 1 ? "player_2" : "player_1"
-            @game_status = true
-            @last_casualty = nil
-            @input = nil 
-            @castling_available_for_player_1 = true
-            @castling_available_for_player_2 = true
+            puts "Couldn't found any saved game."
+            reset
         else
             puts "Would you like to start a new game or load saved game? (N/L)"
             decision = ""
@@ -39,31 +15,7 @@ class Chess
                 puts "Error: Input 'N' for new game or 'L' load game." if decision != "N" && decision != "L"
             end
             if decision == "N"
-                @board = Array.new(8) { |r| Array.new(8) { |c| "" } }
-                @board[0][0] = ["player_1","rook"]
-                @board[0][1] = ["player_1","knight"]
-                @board[0][2] = ["player_1","bishop"]
-                @board[0][3] = ["player_1","queen"]
-                @board[0][4] = ["player_1","king"]
-                @board[0][5] = ["player_1","bishop"]
-                @board[0][6] = ["player_1","knight"]
-                @board[0][7] = ["player_1","rook"]
-                @board[1].collect! { |c| c = ["player_1","pawn"] }
-                @board[6].collect! { |c| c = ["player_2","pawn"] }
-                @board[7][0] = ["player_2","rook"]
-                @board[7][1] = ["player_2","knight"]
-                @board[7][2] = ["player_2","bishop"]
-                @board[7][3] = ["player_2","queen"]
-                @board[7][4] = ["player_2","king"]
-                @board[7][5] = ["player_2","bishop"]
-                @board[7][6] = ["player_2","knight"]
-                @board[7][7] = ["player_2","rook"]
-                @player_turn = rand(2) == 1 ? "player_2" : "player_1"
-                @game_status = true
-                @last_casualty = nil
-                @input = nil 
-                @castling_available_for_player_1 = true
-                @castling_available_for_player_2 = true
+                reset
             elsif decision == "L"
                 puts "Saved games listed below."
                 list_num = 1
@@ -476,7 +428,7 @@ class Chess
             store_moves << [x-2,y] if x == 6 && @board[x-2][y] == ""
             store_moves << [x-1,y+1] if @board[x-1][y+1][0] == "player_1"
             store_moves << [x-1,y-1] if @board[x-1][y-1][0] == "player_1" 
-        elsif piece == "bishop" && @player_turn == "player_1"
+        elsif piece == "bishop" 
             nx = x+1
             ny = y+1
             while @board[nx][ny] == "" && nx < 8 && ny < 8
@@ -485,7 +437,7 @@ class Chess
                 ny += 1
             end
             if nx < 8 && ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2"
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn 
             end
             nx = x-1
             ny = y+1
@@ -495,7 +447,7 @@ class Chess
                 ny += 1
             end
             if ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && nx >= 0
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && nx >= 0
             end
             nx = x+1
             ny = y-1
@@ -505,7 +457,7 @@ class Chess
                 ny -= 1
             end
             if nx < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && ny >= 0
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && ny >= 0
             end
             nx = x-1
             ny = y-1
@@ -514,8 +466,80 @@ class Chess
                 nx -= 1
                 ny -= 1
             end
-            store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && nx >= 0 && ny >= 0
-        elsif piece == "bishop" && @player_turn == "player_2"
+            store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && nx >= 0 && ny >= 0
+        elsif piece == "knight"
+            store_moves << [x+2,y+1] if x+2 < 8 && y+1 < 8 && @board[x+2][y+1][0] != @player_turn
+            store_moves << [x-2,y+1] if x-2 >= 0 && y+1 < 8 && @board[x-2][y+1][0] != @player_turn
+            store_moves << [x+2,y-1] if x+2 < 8 && y-1 >= 0 && @board[x+2][y-1][0] != @player_turn
+            store_moves << [x-2,y-1] if x-2 >= 0 && y-1 >= 0 && @board[x-2][y-1][0] != @player_turn
+            store_moves << [x+1,y+2] if x+1 < 8 && y+2 < 8 && @board[x+1][y+2][0] != @player_turn
+            store_moves << [x-1,y+2] if x-1 >= 0 && y+2 < 8 && @board[x-1][y+2][0] != @player_turn
+            store_moves << [x+1,y-2] if x+1 < 8 && y-2 >= 0 && @board[x+1][y-2][0] != @player_turn
+            store_moves << [x-1,y-2] if x-1 >= 0 && y-2 >= 0 && @board[x-1][y-2][0] != @player_turn
+        elsif piece == "rook"
+            if @player_turn == "player_1"
+                @castling_available_for_player_1 = false
+            else
+                @castling_available_for_player_2 = false
+            end
+            
+            nx = x+1
+            while @board[nx][y] == "" && nx < 8
+                store_moves << [nx,y]
+                nx += 1
+            end
+            if nx < 8
+                store_moves << [nx,y] if @board[nx][y][0] != @player_turn 
+            end
+            nx = x-1
+            while @board[nx][y] == "" && nx >= 0
+                store_moves << [nx,y]
+                nx -= 1
+            end
+            store_moves << [nx,y] if @board[nx][y][0] != @player_turn && nx >= 0
+            ny = y+1
+            while @board[x][ny] == "" && ny < 8
+                store_moves << [x,ny]
+                ny += 1
+            end
+            if ny < 8
+                store_moves << [x,ny] if @board[x][ny][0] != @player_turn 
+            end
+            ny = y-1
+            while @board[x][ny] == "" && ny >= 0
+                store_moves << [x,ny]
+                ny -= 1
+            end
+            store_moves << [x,ny] if @board[x][ny][0] != @player_turn && ny >= 0
+        elsif piece == "queen" 
+            nx = x+1
+            while @board[nx][y] == "" && nx < 8
+                store_moves << [nx,y]
+                nx += 1
+            end
+            if nx < 8
+                store_moves << [nx,y] if @board[nx][y][0] != @player_turn 
+            end
+            nx = x-1
+            while @board[nx][y] == "" && nx >= 0
+                store_moves << [nx,y]
+                nx -= 1
+            end
+            store_moves << [nx,y] if @board[nx][y][0] != @player_turn && nx >= 0
+            ny = y+1
+            while @board[x][ny] == "" && ny < 8
+                store_moves << [x,ny]
+                ny += 1
+            end
+            if ny < 8
+                store_moves << [x,ny] if @board[x][ny][0] != @player_turn 
+            end
+            ny = y-1
+            while @board[x][ny] == "" && ny >= 0
+                store_moves << [x,ny]
+                ny -= 1
+            end
+            store_moves << [x,ny] if @board[x][ny][0] != @player_turn && ny >= 0
             nx = x+1
             ny = y+1
             while @board[nx][ny] == "" && nx < 8 && ny < 8
@@ -524,7 +548,7 @@ class Chess
                 ny += 1
             end
             if nx < 8 && ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1"
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn
             end
             nx = x-1
             ny = y+1
@@ -534,7 +558,7 @@ class Chess
                 ny += 1
             end
             if ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && nx >= 0
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && nx >= 0
             end
             nx = x+1
             ny = y-1
@@ -544,7 +568,7 @@ class Chess
                 ny -= 1
             end
             if nx < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && ny >= 0
+                store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && ny >= 0
             end
             nx = x-1
             ny = y-1
@@ -553,239 +577,22 @@ class Chess
                 nx -= 1
                 ny -= 1
             end
-            store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && nx >= 0 && ny >= 0
-        elsif piece == "knight" && @player_turn == "player_1"
-            store_moves << [x+2,y+1] if x+2 < 8 && y+1 < 8 && @board[x+2][y+1][0] != "player_1"
-            store_moves << [x-2,y+1] if x-2 >= 0 && y+1 < 8 && @board[x-2][y+1][0] != "player_1"
-            store_moves << [x+2,y-1] if x+2 < 8 && y-1 >= 0 && @board[x+2][y-1][0] != "player_1"
-            store_moves << [x-2,y-1] if x-2 >= 0 && y-1 >= 0 && @board[x-2][y-1][0] != "player_1"
-            store_moves << [x+1,y+2] if x+1 < 8 && y+2 < 8 && @board[x+1][y+2][0] != "player_1"
-            store_moves << [x-1,y+2] if x-1 >= 0 && y+2 < 8 && @board[x-1][y+2][0] != "player_1"
-            store_moves << [x+1,y-2] if x+1 < 8 && y-2 >= 0 && @board[x+1][y-2][0] != "player_1"
-            store_moves << [x-1,y-2] if x-1 >= 0 && y-2 >= 0 && @board[x-1][y-2][0] != "player_1"
-        elsif piece == "knight" && @player_turn == "player_2"
-            store_moves << [x+2,y+1] if x+2 < 8 && y+1 < 8 && @board[x+2][y+1][0] != "player_2"
-            store_moves << [x-2,y+1] if x-2 >= 0 && y+1 < 8 && @board[x-2][y+1][0] != "player_2"
-            store_moves << [x+2,y-1] if x+2 < 8 && y-1 >= 0 && @board[x+2][y-1][0] != "player_2"
-            store_moves << [x-2,y-1] if x-2 >= 0 && y-1 >= 0 && @board[x-2][y-1][0] != "player_2"
-            store_moves << [x+1,y+2] if x+1 < 8 && y+2 < 8 && @board[x+1][y+2][0] != "player_2"
-            store_moves << [x-1,y+2] if x-1 >= 0 && y+2 < 8 && @board[x-1][y+2][0] != "player_2"
-            store_moves << [x+1,y-2] if x+1 < 8 && y-2 >= 0 && @board[x+1][y-2][0] != "player_2"
-            store_moves << [x-1,y-2] if x-1 >= 0 && y-2 >= 0 && @board[x-1][y-2][0] != "player_2"
-        elsif piece == "rook" && @player_turn == "player_1"
-            @castling_available_for_player_1 = false
-            nx = x+1
-            while @board[nx][y] == "" && nx < 8
-                store_moves << [nx,y]
-                nx += 1
+            store_moves << [nx,ny] if @board[nx][ny][0] != @player_turn && nx >= 0 && ny >= 0
+        elsif piece == "king"
+            if @player_turn == "player_1"
+                @castling_available_for_player_1 = false
+            else
+                @castling_available_for_player_2 = false
             end
-            if nx < 8
-                store_moves << [nx,y] if @board[nx][y][0] == "player_2" 
-            end
-            nx = x-1
-            while @board[nx][y] == "" && nx >= 0
-                store_moves << [nx,y]
-                nx -= 1
-            end
-            store_moves << [nx,y] if @board[nx][y][0] == "player_2" && nx >= 0
-            ny = y+1
-            while @board[x][ny] == "" && ny < 8
-                store_moves << [x,ny]
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [x,ny] if @board[x][ny][0] == "player_2" 
-            end
-            ny = y-1
-            while @board[x][ny] == "" && ny >= 0
-                store_moves << [x,ny]
-                ny -= 1
-            end
-            store_moves << [x,ny] if @board[x][ny][0] == "player_2" && ny >= 0
-        elsif piece == "rook" && @player_turn == "player_2"
-            @castling_available_for_player_2 = false
-            nx = x+1
-            while @board[nx][y] == "" && nx < 8
-                store_moves << [nx,y]
-                nx += 1
-            end
-            if nx < 8
-                store_moves << [nx,y] if @board[nx][y][0] == "player_1" 
-            end
-            nx = x-1
-            while @board[nx][y] == "" && nx >= 0
-                store_moves << [nx,y]
-                nx -= 1
-            end
-            store_moves << [nx,y] if @board[nx][y][0] == "player_1" && nx >= 0
-            ny = y+1
-            while @board[x][ny] == "" && ny < 8
-                store_moves << [x,ny]
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [x,ny] if @board[x][ny][0] == "player_1" 
-            end
-            ny = y-1
-            while @board[x][ny] == "" && ny >= 0
-                store_moves << [x,ny]
-                ny -= 1
-            end
-            store_moves << [x,ny] if @board[x][ny][0] == "player_1" && ny >= 0
-        elsif piece == "queen" && @player_turn == "player_1"
-            nx = x+1
-            while @board[nx][y] == "" && nx < 8
-                store_moves << [nx,y]
-                nx += 1
-            end
-            if nx < 8
-                store_moves << [nx,y] if @board[nx][y][0] == "player_2" 
-            end
-            nx = x-1
-            while @board[nx][y] == "" && nx >= 0
-                store_moves << [nx,y]
-                nx -= 1
-            end
-            store_moves << [nx,y] if @board[nx][y][0] == "player_2" && nx >= 0
-            ny = y+1
-            while @board[x][ny] == "" && ny < 8
-                store_moves << [x,ny]
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [x,ny] if @board[x][ny][0] == "player_2" 
-            end
-            ny = y-1
-            while @board[x][ny] == "" && ny >= 0
-                store_moves << [x,ny]
-                ny -= 1
-            end
-            store_moves << [x,ny] if @board[x][ny][0] == "player_2" && ny >= 0
-            nx = x+1
-            ny = y+1
-            while @board[nx][ny] == "" && nx < 8 && ny < 8
-                store_moves << [nx,ny]
-                nx += 1
-                ny += 1
-            end
-            if nx < 8 && ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2"
-            end
-            nx = x-1
-            ny = y+1
-            while @board[nx][ny] == "" && nx >= 0 && ny < 8
-                store_moves << [nx,ny]
-                nx -= 1
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && nx >= 0
-            end
-            nx = x+1
-            ny = y-1
-            while @board[nx][ny] == "" && nx < 8 && ny >= 0
-                store_moves << [nx,ny]
-                nx += 1
-                ny -= 1
-            end
-            if nx < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && ny >= 0
-            end
-            nx = x-1
-            ny = y-1
-            while @board[nx][ny] == "" && nx >= 0 && ny >= 0
-                store_moves << [nx,ny]
-                nx -= 1
-                ny -= 1
-            end
-            store_moves << [nx,ny] if @board[nx][ny][0] == "player_2" && nx >= 0 && ny >= 0
-        elsif piece == "queen" && @player_turn == "player_2"
-            nx = x+1
-            while @board[nx][y] == "" && nx < 8
-                store_moves << [nx,y]
-                nx += 1
-            end
-            if nx < 8
-                store_moves << [nx,y] if @board[nx][y][0] == "player_1" 
-            end
-            nx = x-1
-            while @board[nx][y] == "" && nx >= 0
-                store_moves << [nx,y]
-                nx -= 1
-            end
-            store_moves << [nx,y] if @board[nx][y][0] == "player_1" && nx >= 0
-            ny = y+1
-            while @board[x][ny] == "" && ny < 8
-                store_moves << [x,ny]
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [x,ny] if @board[x][ny][0] == "player_1" 
-            end
-            ny = y-1
-            while @board[x][ny] == "" && ny >= 0
-                store_moves << [x,ny]
-                ny -= 1
-            end
-            store_moves << [x,ny] if @board[x][ny][0] == "player_1" && ny >= 0
-            nx = x+1
-            ny = y+1
-            while @board[nx][ny] == "" && nx < 8 && ny < 8
-                store_moves << [nx,ny]
-                nx += 1
-                ny += 1
-            end
-            if nx < 8 && ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1"
-            end
-            nx = x-1
-            ny = y+1
-            while @board[nx][ny] == "" && nx >= 0 && ny < 8
-                store_moves << [nx,ny]
-                nx -= 1
-                ny += 1
-            end
-            if ny < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && nx >= 0
-            end
-            nx = x+1
-            ny = y-1
-            while @board[nx][ny] == "" && nx < 8 && ny >= 0
-                store_moves << [nx,ny]
-                nx += 1
-                ny -= 1
-            end
-            if nx < 8
-                store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && ny >= 0
-            end
-            nx = x-1
-            ny = y-1
-            while @board[nx][ny] == "" && nx >= 0 && ny >= 0
-                store_moves << [nx,ny]
-                nx -= 1
-                ny -= 1
-            end
-            store_moves << [nx,ny] if @board[nx][ny][0] == "player_1" && nx >= 0 && ny >= 0
-        elsif piece == "king" && @player_turn == "player_1"
-            @castling_available_for_player_1 = false
-            store_moves << [x+1,y] if x+1 < 8 && @board[x+1][y] == "" && @board[x+1][y][0] == "player_2"
-            store_moves << [x+1,y+1] if x+1 < 8 && y+1 < 8 && @board[x+1][y+1] == "" && @board[x+1][y+1][0] == "player_2"
-            store_moves << [x+1,y-1] if x+1 < 8 && y-1 >= 0 && @board[x+1][y-1] == "" && @board[x+1][y-1][0] == "player_2"
-            store_moves << [x,y+1] if y+1 < 8 && @board[x][y+1] == "" && @board[x][y+1][0] == "player_2"
-            store_moves << [x,y-1] if y-1 >= 0 && @board[x][y-1] == "" && @board[x][y-1][0] == "player_2"
-            store_moves << [x-1,y] if x-1 >= 0 && @board[x-1][y] == "" && @board[x-1][y][0] == "player_2"
-            store_moves << [x-1,y+1] if x-1 >= 0 && y+1 < 8 && @board[x-1][y+1] == "" && @board[x-1][y+1][0] == "player_2"
-            store_moves << [x-1,y-1] if x-1 >= 0 && y-1 >= 0 && @board[x-1][y-1] == "" && @board[x-1][y-1][0] == "player_2"
-        elsif piece == "king" && @player_turn == "player_2"
-            @castling_available_for_player_2 = false
-            store_moves << [x+1,y] if x+1 < 8 && @board[x+1][y] == "" && @board[x+1][y][0] == "player_1"
-            store_moves << [x+1,y+1] if x+1 < 8 && y+1 < 8 && @board[x+1][y+1] == "" && @board[x+1][y+1][0] == "player_1"
-            store_moves << [x+1,y-1] if x+1 < 8 && y-1 >= 0 && @board[x+1][y-1] == "" && @board[x+1][y-1][0] == "player_1"
-            store_moves << [x,y+1] if y+1 < 8 && @board[x][y+1] == "" && @board[x][y+1][0] == "player_1"
-            store_moves << [x,y-1] if y-1 >= 0 && @board[x][y-1] == "" && @board[x][y-1][0] == "player_1"
-            store_moves << [x-1,y] if x-1 >= 0 && @board[x-1][y] == "" && @board[x-1][y][0] == "player_1"
-            store_moves << [x-1,y+1] if x-1 >= 0 && y+1 < 8 && @board[x-1][y+1] == "" && @board[x-1][y+1][0] == "player_1"
-            store_moves << [x-1,y-1] if x-1 >= 0 && y-1 >= 0 && @board[x-1][y-1] == "" && @board[x-1][y-1][0] == "player_1"
+            
+            store_moves << [x+1,y] if x+1 < 8 && @board[x+1][y] == "" && @board[x+1][y][0] != @player_turn
+            store_moves << [x+1,y+1] if x+1 < 8 && y+1 < 8 && @board[x+1][y+1] == "" && @board[x+1][y+1][0] != @player_turn
+            store_moves << [x+1,y-1] if x+1 < 8 && y-1 >= 0 && @board[x+1][y-1] == "" && @board[x+1][y-1][0] != @player_turn
+            store_moves << [x,y+1] if y+1 < 8 && @board[x][y+1] == "" && @board[x][y+1][0] != @player_turn
+            store_moves << [x,y-1] if y-1 >= 0 && @board[x][y-1] == "" && @board[x][y-1][0] != @player_turn
+            store_moves << [x-1,y] if x-1 >= 0 && @board[x-1][y] == "" && @board[x-1][y][0] != @player_turn
+            store_moves << [x-1,y+1] if x-1 >= 0 && y+1 < 8 && @board[x-1][y+1] == "" && @board[x-1][y+1][0] != @player_turn
+            store_moves << [x-1,y-1] if x-1 >= 0 && y-1 >= 0 && @board[x-1][y-1] == "" && @board[x-1][y-1][0] != @player_turn
         else
             store_moves = nil
         end
