@@ -20,6 +20,7 @@ class Chess
                 list_num = 1
                 Dir.each_child("savegames") do |file| 
                     puts "#{list_num}. #{file}"
+                    list_num += 1
                 end 
                 file_num = 0
                 while file_num < 1 || file_num > list_num
@@ -27,7 +28,7 @@ class Chess
                     file_num = gets.chomp
                     file_num = file_num.match(/\D/) ? -1 : file_num.to_i
                 end
-                file_to_load = Dir.childeren("savegames")[file_num-1] #**************test this**************
+                file_to_load = Dir.childeren("savegames")[file_num-1] 
                 puts "Loading #{file_num}. #{file_to_load}..."
                 @game_status = true
                 @last_casualty = nil
