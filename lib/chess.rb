@@ -116,16 +116,16 @@ class Chess
         while @game_status
             @last_casualty = nil
             print_board
-            if @player_turn == "player_1"
+            
                 puts "Please enter the cordinations of the chess piece you would like to select."
                 selected = select_piece_menu("select")
                 if @input == castling
-                    @player_turn = "player_2"
+                    pass_turn
                     next
                 end
                 target = select_piece_menu("target")
                 if @input == castling
-                    @player_turn = "player_2"
+                    pass_turn
                     next
                 end
                 while move_piece(selected,target) == "invalid move"
@@ -163,65 +163,23 @@ class Chess
                         save_and_reset
                     end
                 end
-                if @board[7].any? { |p| p == ["player_1","pawn"] }
-                    promote_pawn(7,@board[7].index(["player_1","pawn"]))
-                end
-                @game_status = false if won? == true
-                @player_turn = "player_2"
-            elsif @player_turn == "player_2"
-                puts "Please enter the cordinations of the chess piece you would like to select."
-                selected = select_piece_menu("select")
-                if @input == castling
-                    @player_turn = "player_1"
-                    next
-                end
-                target = select_piece_menu("target")
-                if @input == castling
-                    @player_turn = "player_1"
-                    next
-                end
-                while move_piece(selected,target) == "invalid move"
-                    puts "Invalid move. Please try again."
-                    selected = select_piece_menu("select")
-                    if @input == "exit"
-                        @game_status = false
-                        puts "Exiting game..."
-                        return
-                    elsif @input == "save"
-                        puts "Saving and exiting game..."
-                        save_game
-                        @game_status = false
-                        return
-                    elsif @input == "reset"
-                        reset
-                    elsif @input == "save and reset"
-                        puts "Saving and starting new game..."
-                        save_and_reset
+                if @player_turn == "player_1"
+                    if @board[7].any? { |p| p == ["player_1","pawn"] }
+                        promote_pawn(7,@board[7].index(["player_1","pawn"]))
                     end
-                    target = select_piece_menu("target")
-                    if @input == "exit"
-                        @game_status = false
-                        puts "Exiting game..."
-                        return
-                    elsif @input == "save"
-                        puts "Saving and exiting game..."
-                        save_game
-                        @game_status = false
-                        return
-                    elsif @input == "reset"
-                        reset
-                    elsif @input == "save and reset"
-                        puts "Saving and starting new game..."
-                        save_and_reset
+                else
+                    if @board[0].any? { |p| p == ["player_2","pawn"] }
+                        promote_pawn(0,@board[0].index(["player_2","pawn"]))
                     end
                 end
-                if @board[0].any? { |p| p == ["player_2","pawn"] }
-                    promote_pawn(0,@board[0].index(["player_2","pawn"]))
-                end
                 @game_status = false if won? == true
-                @player_turn = "player_1"
-            end
+                pass_turn
+            
         end
+    end
+    
+    def pass_turn
+        @player_turn = @player_turn == "player_1" ? "player_2" : "player_1"
     end
 
     def save_game
