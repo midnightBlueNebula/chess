@@ -2,7 +2,6 @@ class Chess
 
     attr_accessor :board, :game_status, :input, :last_casualty, :player_turn 
 
-    #pawn promotion*************************************
     def initialize
         if Dir.empty?("savegames")
             puts "Couldn't found any saved game."
