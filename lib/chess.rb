@@ -560,4 +560,4 @@ class Chess
 end
 
 chess = Chess.new 
-chess.print_board
+chess.play
